@@ -41,3 +41,13 @@ android {
     abortOnError false
   }
 }
+
+repositories {
+    google()
+    mavenCentral()
+    maven { url "https://www.jitpack.io" }
+}
+
+dependencies {
+    implementation 'com.lambdapioneer.argon2kt:argon2kt:1.6.0'
+}

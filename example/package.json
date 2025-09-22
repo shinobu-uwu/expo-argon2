@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "expo": "~54.0.9",
+    "expo-clipboard": "~8.0.7",
     "react": "19.1.0",
     "react-native": "0.81.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.4",
     "@types/react": "~19.1.0",
     "typescript": "~5.9.2"
   },

@@ -1,48 +1,41 @@
 import ExpoModulesCore
+import Argon2Swift
 
 public class ExpoArgon2Module: Module {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
-  public func definition() -> ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoArgon2')` in JavaScript.
-    Name("ExpoArgon2")
-
-    // Defines constant property on the module.
-    Constant("PI") {
-      Double.pi
-    }
-
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      return "Hello world! 👋"
-    }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { (value: String) in
-      // Send an event to JavaScript.
-      self.sendEvent("onChange", [
-        "value": value
-      ])
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of the
-    // view definition: Prop, Events.
-    View(ExpoArgon2View.self) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { (view: ExpoArgon2View, url: URL) in
-        if view.webView.url != url {
-          view.webView.load(URLRequest(url: url))
+    public func definition() -> ModuleDefinition {
+        Name("ExpoArgon2")
+        Function("hash") {
+            (password: String, salt: String, options: [String: Any]) in
+            let timeCost = options["timeCost"] as? Int ?? 3
+            let memoryCost = options["memoryCost"] as? Int ?? 4096
+            let parallelism = options["parallelism"] as? Int ?? 1
+            let hashLength = options["hashLength"] as? Int ?? 32
+            let typeString = options["type"] as? String ?? "argon2id"
+            let type: Argon2Type
+            
+            switch (typeString) {
+            case "argon2d":
+                type = .d
+            case "argon2i":
+                type = .i
+            case "argon2id":
+                type = .id
+            default:
+                throw Exception(name: "InvalidMode", description: "Invalid Argon2 mode: \(typeString)")
+            }
+            
+            guard let passwordData = password.data(using: .utf8),
+                  let saltData = salt.data(using: .utf8) else {
+                throw Exception(name: "EncodingError", description: "Failed to encode password or salt")
+            }
+            
+            let result = try! Argon2Swift.hashPasswordBytes(password: passwordData, salt: Salt.init(bytes: saltData), iterations: timeCost, memory: memoryCost, parallelism: parallelism, length: hashLength, type: type)
+            
+            return [
+                "hex": result.hexString(),
+                "raw": result.hashData(),
+                "encoded": result.encodedString()
+            ]
         }
-      }
-
-      Events("onLoad")
     }
-  }
 }

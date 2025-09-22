@@ -1,50 +1,48 @@
 package expo.modules.argon2
 
+import com.lambdapioneer.argon2kt.Argon2Exception
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
+import com.lambdapioneer.argon2kt.Argon2Kt;
+import com.lambdapioneer.argon2kt.Argon2Mode
 
 class ExpoArgon2Module : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
-  override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoArgon2')` in JavaScript.
-    Name("ExpoArgon2")
+    override fun definition() = ModuleDefinition {
+        Name("ExpoArgon2")
 
-    // Defines constant property on the module.
-    Constant("PI") {
-      Math.PI
+        Function("hash") { password: String, salt: String, options: Map<String, Any> ->
+            val argon2 = Argon2Kt()
+            val timeCost = (options["timeCost"] as? Number)?.toInt() ?: 3
+            val memoryCost = (options["memoryCost"] as? Number)?.toInt() ?: 4096
+            val parallelism = (options["parallelism"] as? Number)?.toInt() ?: 1
+            val hashLength = (options["hashLength"] as? Number)?.toInt() ?: 32
+            val modeString = (options["type"] as? String) ?: "argon2id"
+            val mode = when (modeString) {
+                "argon2d" -> Argon2Mode.ARGON2_D
+                "argon2i" -> Argon2Mode.ARGON2_I
+                "argon2id" -> Argon2Mode.ARGON2_ID
+                else -> throw Argon2Exception("Invalid mode")
+            }
+            val passwordBytes = password.toByteArray(Charsets.UTF_8)
+            val saltBytes = salt.toByteArray(Charsets.UTF_8)
+            val result = argon2.hash(
+                mode = mode,
+                password = passwordBytes,
+                salt = saltBytes,
+                tCostInIterations = timeCost,
+                mCostInKibibyte = memoryCost,
+                parallelism = parallelism,
+                hashLengthInBytes = hashLength
+            )
+            val rawHash = result.rawHashAsByteArray()
+            val hexString = result.rawHashAsHexadecimal()
+            val encodedString = result.encodedOutputAsString()
+
+            return@Function mapOf(
+                "raw" to rawHash,
+                "encoded" to encodedString,
+                "hex" to hexString
+            )
+        }
     }
-
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
-
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
-    }
-
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(ExpoArgon2View::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: ExpoArgon2View, url: URL ->
-        view.webView.loadUrl(url.toString())
-      }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
-    }
-  }
 }

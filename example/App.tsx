@@ -1,39 +1,69 @@
-import { useEvent } from 'expo';
-import ExpoArgon2, { ExpoArgon2View } from 'expo-argon2';
-import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native';
+import ExpoArgon2 from 'expo-argon2';
+import * as Clipboard from 'expo-clipboard';
+import { useState } from 'react';
+import { Button, SafeAreaView, Text, TextInput, View } from 'react-native';
 
 export default function App() {
-  const onChangePayload = useEvent(ExpoArgon2, 'onChange');
+  const [password, setPassword] = useState('');
+  const [salt, setSalt] = useState('');
+  const [hash, setHash] = useState<{
+    encoded: string;
+    hex: string;
+    raw: Uint8Array;
+  }>({ encoded: '', hex: '', raw: new Uint8Array() });
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.header}>Module API Example</Text>
-        <Group name="Constants">
-          <Text>{ExpoArgon2.PI}</Text>
-        </Group>
-        <Group name="Functions">
-          <Text>{ExpoArgon2.hello()}</Text>
-        </Group>
-        <Group name="Async functions">
-          <Button
-            title="Set value"
-            onPress={async () => {
-              await ExpoArgon2.setValueAsync('Hello from JS!');
-            }}
-          />
-        </Group>
-        <Group name="Events">
-          <Text>{onChangePayload?.value}</Text>
-        </Group>
-        <Group name="Views">
-          <ExpoArgon2View
-            url="https://www.example.com"
-            onLoad={({ nativeEvent: { url } }) => console.log(`Loaded: ${url}`)}
-            style={styles.view}
-          />
-        </Group>
-      </ScrollView>
+      <View
+        style={{
+          flex: 1,
+          gap: 8,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <TextInput
+          style={{ width: '100%' }}
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Password"
+        />
+        <TextInput
+          style={{ width: '100%' }}
+          value={salt}
+          onChangeText={setSalt}
+          placeholder="Salt"
+        />
+        <View style={{ flexDirection: 'row', gap: 10, margin: 20 }}>
+          <Text>Encoded: </Text>
+          <Text>{hash.encoded}</Text>
+        </View>
+        <View style={{ flexDirection: 'row', gap: 10, margin: 20 }}>
+          <Text>Hex: </Text>
+          <Text>{hash.hex}</Text>
+        </View>
+        <View style={{ flexDirection: 'row', gap: 10, margin: 20 }}>
+          <Text>Raw: </Text>
+          <Text>{hash.raw}</Text>
+        </View>
+        <Button
+          onPress={() => {
+            const result = ExpoArgon2.hash(password, salt, {
+              type: 'argon2d',
+              timeCost: 3,
+              memoryCost: 65536,
+              parallelism: 4,
+              hashLength: 32,
+            });
+            setHash(result);
+          }}
+          title="Hash"
+        />
+        <Button
+          onPress={() => Clipboard.setStringAsync(hash.encoded)}
+          title="Copy"
+        />
+      </View>
     </SafeAreaView>
   );
 }
