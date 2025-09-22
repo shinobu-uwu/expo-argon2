@@ -19,7 +19,11 @@
     "react-native",
     "expo",
     "expo-argon2",
-    "ExpoArgon2"
+    "argon2",
+    "crypto",
+    "hash",
+    "password",
+    "encryption"
   ],
   "repository": "https://github.com/shinobu-uwu/expo-argon2",
   "bugs": {
