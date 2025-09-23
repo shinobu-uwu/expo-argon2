@@ -3,14 +3,15 @@ package expo.modules.argon2
 import com.lambdapioneer.argon2kt.Argon2Exception
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import com.lambdapioneer.argon2kt.Argon2Kt;
+import expo.modules.kotlin.typedarray.Uint8Array
+import com.lambdapioneer.argon2kt.Argon2Kt
 import com.lambdapioneer.argon2kt.Argon2Mode
 
 class ExpoArgon2Module : Module() {
     override fun definition() = ModuleDefinition {
         Name("ExpoArgon2")
 
-        Function("hash") { password: String, salt: String, options: Map<String, Any> ->
+        Function("hash") { password: ByteArray, salt: ByteArray, options: Map<String, Any> ->
             val argon2 = Argon2Kt()
             val timeCost = (options["timeCost"] as? Number)?.toInt() ?: 3
             val memoryCost = (options["memoryCost"] as? Number)?.toInt() ?: 4096
@@ -23,12 +24,10 @@ class ExpoArgon2Module : Module() {
                 "argon2id" -> Argon2Mode.ARGON2_ID
                 else -> throw Argon2Exception("Invalid mode")
             }
-            val passwordBytes = password.toByteArray(Charsets.UTF_8)
-            val saltBytes = salt.toByteArray(Charsets.UTF_8)
             val result = argon2.hash(
                 mode = mode,
-                password = passwordBytes,
-                salt = saltBytes,
+                password = password,
+                salt = salt,
                 tCostInIterations = timeCost,
                 mCostInKibibyte = memoryCost,
                 parallelism = parallelism,

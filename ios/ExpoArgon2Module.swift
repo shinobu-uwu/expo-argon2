@@ -5,7 +5,7 @@ public class ExpoArgon2Module: Module {
     public func definition() -> ModuleDefinition {
         Name("ExpoArgon2")
         Function("hash") {
-            (password: String, salt: String, options: [String: Any]) in
+            (password: Data, salt: Data, options: [String: Any]) in
             let timeCost = options["timeCost"] as? Int ?? 3
             let memoryCost = options["memoryCost"] as? Int ?? 4096
             let parallelism = options["parallelism"] as? Int ?? 1
@@ -24,12 +24,7 @@ public class ExpoArgon2Module: Module {
                 throw Exception(name: "InvalidMode", description: "Invalid Argon2 mode: \(typeString)")
             }
             
-            guard let passwordData = password.data(using: .utf8),
-                  let saltData = salt.data(using: .utf8) else {
-                throw Exception(name: "EncodingError", description: "Failed to encode password or salt")
-            }
-            
-            let result = try! Argon2Swift.hashPasswordBytes(password: passwordData, salt: Salt.init(bytes: saltData), iterations: timeCost, memory: memoryCost, parallelism: parallelism, length: hashLength, type: type)
+            let result = try! Argon2Swift.hashPasswordBytes(password: password, salt: Salt.init(bytes: salt), iterations: timeCost, memory: memoryCost, parallelism: parallelism, length: hashLength, type: type)
             
             return [
                 "hex": result.hexString(),

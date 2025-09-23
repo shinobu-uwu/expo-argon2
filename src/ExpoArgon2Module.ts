@@ -9,8 +9,8 @@ declare class ExpoArgon2Module extends NativeModule {
    * @returns An object containing the raw hash, encoded hash, and hex representation of the hash.
    */
   hash(
-    password: string,
-    salt: string,
+    password: Uint8Array,
+    salt: Uint8Array,
     options?: {
       timeCost?: number; // default 3
       memoryCost?: number; // default 4096
