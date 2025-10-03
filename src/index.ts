@@ -1,6 +1,6 @@
 import ExpoArgon2Module from './ExpoArgon2Module';
 
-export function hash(
+export async function hash(
   password: string | Uint8Array,
   salt: string | Uint8Array,
   options?: {
