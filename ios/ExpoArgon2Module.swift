@@ -29,7 +29,8 @@ public class ExpoArgon2Module: Module {
             return [
                 "hex": result.hexString(),
                 "raw": result.hashData(),
-                "encoded": result.encodedString()
+                // i'm not sure why, but the encoded string has trailing null characters that need to be trimmed
+                "encoded": result.encodedString().trimmingCharacters(in: CharacterSet(charactersIn: "\0"))
             ]
         }
     }
