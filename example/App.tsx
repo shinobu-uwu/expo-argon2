@@ -1,4 +1,4 @@
-import { hash } from 'expo-argon2';
+import { hash, hashAsync } from 'expo-argon2';
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -36,12 +36,21 @@ export default function App() {
           />
           <Button
             mode="contained"
-            onPress={async () => {
+            onPress={() => {
               const hashed = hash(password, salt);
               setResult(hashed.encoded);
             }}
           >
             Hash
+          </Button>
+          <Button
+            mode="contained"
+            onPress={async () => {
+              const hashed = await hashAsync(password, salt);
+              setResult(hashed.encoded);
+            }}
+          >
+            Hash asynchronously
           </Button>
           <Button
             mode="contained"
