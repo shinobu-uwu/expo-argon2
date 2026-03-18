@@ -21,9 +21,15 @@ Pod::Spec.new do |s|
   s.dependency 'ExpoModulesCore'
   s.dependency 'Argon2Swift'
 
-  # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
+    'SWIFT_INCLUDE_PATHS' => '$(inherited) $(PODS_CONFIGURATION_BUILD_DIR)/Argon2Swift',
+    'OTHER_SWIFT_FLAGS' => '$(inherited) -D EXPO_MODULES_CORE'
+  }
+  
+  # Ensure the C headers are accessible if Argon2Swift doesn't export them correctly
+  s.user_target_xcconfig = { 
+    'HEADER_SEARCH_PATHS' => '$(inherited) $(PODS_ROOT)/Argon2Swift' 
   }
 
   s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
