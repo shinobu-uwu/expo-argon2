@@ -1,6 +1,6 @@
 {
   "name": "expo-argon2",
-  "version": "0.3.1",
+  "version": "0.4.1",
   "description": "Argon2 bindings for expo apps",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -35,14 +35,14 @@
   "dependencies": {},
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
-    "@types/react": "~19.1.0",
-    "expo": "^54.0.7",
-    "expo-module-scripts": "^5.0.7",
-    "react-native": "0.81.4"
+    "@types/react": "~19.2.10",
+    "expo": "^55.0.0",
+    "expo-module-scripts": "^5.0.8",
+    "react-native": "0.83.2"
   },
   "peerDependencies": {
     "expo": "*",
-    "react": "*",
+    "react": "^19.1.1",
     "react-native": "*"
   }
 }
